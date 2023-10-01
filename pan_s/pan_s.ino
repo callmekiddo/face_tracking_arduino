@@ -14,9 +14,7 @@ void Pos()
 {
   if(prevX != x)
   {
-    int servoX = map(x, 300, -300, 180, 0);
-    servoX = min(servoX, 180);
-    servoX = max(servoX, 0);
+    int servoX = map(x, -1, 1, 0, 180);
     targetPos = servoX; // Đặt vị trí mục tiêu mới
     
   }
@@ -24,10 +22,17 @@ void Pos()
   if (currentPos != targetPos) {
     if (currentPos < targetPos) {
       currentPos++; // Tăng góc quay lên
+      if(currentPos > 180) {
+        currentPos--;
+      }
     } else {
       currentPos--; // Giảm góc quay xuống
+      if(currentPos <= 0) {
+        currentPos++;
+      }
     }
     servoPan.write(currentPos); // Đặt góc quay cho servoPan
+    
   }
 }
 void loop()

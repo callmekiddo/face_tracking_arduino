@@ -1,64 +1,59 @@
-//Face Tracker using OpenCV and Arduino
-//by Shubham Santosh
-
-#include<Servo.h>
-
-Servo Pan, Tilt;
-int width = 700, height = 700;  // total resolution of the video
-int Ppos = 90, Tpos = 90;  // initial positions of both Servos
+#include <Servo.h>
+Servo servoTilt;  // Xoay dọc
+Servo servoPan;   // Xoay ngang
+int x;
+int y;
+int prevX = 0;
+int prevY = 90;
 void setup() {
-
   Serial.begin(9600);
-  x.attach(6);
-  y.attach(5);
-  // Serial.print(width);
-  //Serial.print("\t");
-  //Serial.println(height);
-  x.write(Ppos);
-  y.write(Tpos);
+  servoTilt.attach(5);  // Dọc gắn vào 5
+  servoPan.attach(6);   // Ngang gắn vào 6
+  servoTilt.write(90);
+  servoPan.write(90);
 }
-const int angle = 2;   // degree of increment or decrement
+void Pos() {
+  if (x > 0) {
+    prevX += 2;
+    if (prevX >= 180) {
+      prevX -= 2;
+    }
+  }
+  if (x < 0) {
+    prevX -= 2;
+    if (prevX <= 0) {
+      prevX += 2;
+    }
+  }
+  if (y < 0) {
+    prevY += 2;
+    if (prevY >= 180) {
+      prevY -= 2;
+    }
+  }
+  if (y > 0) {
+    prevY -= 2;
+    if (prevY <= 0) {
+      prevY += 2;
+    }
+  }
+  servoPan.write(prevX);
+  servoTilt.write(prevY);
+}
 
 void loop() {
-  if (Serial.available() > 0)
-  {
-    int x_mid, y_mid;
-    if (Serial.read() == 'X')
+  if (Serial.available() > 0) {
+    if (Serial.read() == 'X')  // Nhận ký tự X
     {
-      x_mid = Serial.parseInt();  // read center x-coordinate
-      if (Serial.read() == 'Y')
-        y_mid = Serial.parseInt(); // read center y-coordinate
+      x = Serial.parseInt();
+      if (Serial.read() == 'Y')  // Nhận ký tự Y
+      {
+        y = Serial.parseInt();
+        Pos();
+      }
     }
-    /* adjust the servo within the squared region if the coordinates
-        is outside it
-    */
-    if (x_mid > width / 2 + 30)
-      xpos += angle;
-    if (x_mid < width / 2 - 30)
-      xpos -= angle;
-    if (y_mid < height / 2 + 30)
-      ypos -= angle;
-    if (y_mid > height / 2 - 30)
-      ypos += angle;
-
-
-    // if the servo degree is outside its range
-    if (xpos >= 180)
-      xpos = 180;
-    else if (xpos <= 0)
-      xpos = 0;
-    if (ypos >= 180)
-      ypos = 180;
-    else if (ypos <= 0)
-      ypos = 0;
-
-    x.write(xpos);
-    y.write(ypos);
-
-    // used for testing
-    //Serial.print("\t");
-    // Serial.print(x_mid);
-    // Serial.print("\t");
-    // Serial.println(y_mid);
+    while (Serial.available() > 0) {
+      Serial.read();
+    }
   }
 }
