@@ -1,14 +1,11 @@
 #include <Servo.h>
 Servo servoTilt;  // Xoay dọc
 Servo servoPan;   // Xoay ngang
-int currentPosX = 90;
-int targetPosX;
-int currentPosY = 90;
-int targetPosY;
 int x;
 int y;
-int prevX;
-int prevY;
+int prevX = 90;
+int prevY = 90;
+int a = 2; // angle
 void setup() {
   Serial.begin(9600);
   servoTilt.attach(5);  // Dọc gắn vào 5
@@ -17,13 +14,32 @@ void setup() {
   servoPan.write(90);
 }
 void Pos() {
-  if (prevX != x || prevY != y) {
-    int servoX = map(x, 300, -300, 0, 180);
-    int servoY = map(y, 300, -300, 180, 0);
-    servoPan.write(servoX);   // Đặt góc quay cho servoPan
-    servoTilt.write(servoY);  // Đặt góc quay cho servoTilt
+  if (x > 0) {
+    prevX += a;
+    if (prevX >= 180) {
+      prevX -= a;
+    }
   }
-  
+  if (x < 0) {
+    prevX -= a;
+    if (prevX <= 0) {
+      prevX += a;
+    }
+  }
+  if (y < 0) {
+    prevY += a;
+    if (prevY >= 180) {
+      prevY -= a;
+    }
+  }
+  if (y > 0) {
+    prevY -= a;
+    if (prevY <= 0) {
+      prevY += a;
+    }
+  }
+  servoPan.write(prevX);
+  servoTilt.write(prevY);
 }
 
 void loop() {
@@ -31,7 +47,6 @@ void loop() {
     if (Serial.read() == 'X')  // Nhận ký tự X
     {
       x = Serial.parseInt();
-      Pos();
       if (Serial.read() == 'Y')  // Nhận ký tự Y
       {
         y = Serial.parseInt();
